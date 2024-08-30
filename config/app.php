@@ -1,7 +1,7 @@
 <?php
 
 return [
-
+    
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -127,6 +127,7 @@ return [
         'Auth' => Illuminate\Support\Facades\Auth::class,
         'Gate' => Illuminate\Support\Facades\Gate::class,
         'Hash' => Illuminate\Support\Facades\Hash::class,
+        'Route' => Illuminate\Support\Facades\Route::class
     ],
 
 ];
