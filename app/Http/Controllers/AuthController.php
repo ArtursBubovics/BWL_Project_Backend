@@ -16,6 +16,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'device_name' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -28,7 +29,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $user->createToken('Personal Access Token')->plainTextToken;
+        $token = $user->createToken($request->device_name)->plainTextToken;
 
         return response()->json(['token' => $token], 201);
     }
@@ -38,6 +39,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string',
+            'device_name' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -53,7 +55,8 @@ class AuthController extends Controller
         $user = Auth::user();
         
         if ($user instanceof \App\Models\User) {
-            return $user->createToken($request->device_name)->plainTextToken;
+            $token = $user->createToken($request->device_name)->plainTextToken;
+            return response()->json(['token' => $token], 200);
         } else {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
