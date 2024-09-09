@@ -67,9 +67,13 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "token": {
+                                        "access_token": {
                                             "type": "string",
                                             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHBpcmF0aW9uX3Rva2VuIjoiV2FsdC1bNVZ2VzJ9.S5V8mZ_dARea8T-b6gV5G7Hs5J8iQHcOZznzthktds0"
+                                        },
+                                        "refresh_token": {
+                                            "type": "string",
+                                            "example": "r1m32z8cE4Tcn3j8NtbSjU2w9v36JS4e7Lrmz2hBGu9n1X6zbG5RxRz8DNi9P3Fl"
                                         }
                                     },
                                     "type": "object"
@@ -140,9 +144,13 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "token": {
+                                        "access_token": {
                                             "type": "string",
                                             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHBpcmF0aW9uX3Rva2VuIjoiV2FsdC1bNVZ2VzJ9.S5V8mZ_dARea8T-b6gV5G7Hs5J8iQHcOZznzthktds0"
+                                        },
+                                        "refresh_token": {
+                                            "type": "string",
+                                            "example": "r1m32z8cE4Tcn3j8NtbSjU2w9v36JS4e7Lrmz2hBGu9n1X6zbG5RxRz8DNi9P3Fl"
                                         }
                                     },
                                     "type": "object"
@@ -183,12 +191,241 @@
                     }
                 }
             }
+        },
+        "/api/new-access-token": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Generate a new access token using a refresh token",
+                "operationId": "333368e070bc9dead0eaa845c828d5a7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "refresh_token",
+                                    "device_name"
+                                ],
+                                "properties": {
+                                    "refresh_token": {
+                                        "type": "string",
+                                        "example": "r1m32z8cE4Tcn3j8NtbSjU2w9v36JS4e7Lrmz2hBGu9n1X6zbG5RxRz8DNi9P3Fl"
+                                    },
+                                    "device_name": {
+                                        "type": "string",
+                                        "example": "My Device"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "New access token generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHBpcmF0aW9uX3Rva2VuIjoiV2FsdC1bNVZ2VzJ9.S5V8mZ_dARea8T-b6gV5G7Hs5J8iQHcOZznzthktds0"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid or expired refresh token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid or expired refresh token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation errors",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/update": {
+            "put": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update user data",
+                "operationId": "7a0d9876f1920e7243aeb8076326a018",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "johndoe@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User data updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User updated successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not authenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation errors",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/user/delete": {
+            "delete": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete the current authenticated user and associated tokens",
+                "operationId": "a88365b035eb2f692df9bd8e5443e229",
+                "responses": {
+                    "200": {
+                        "description": "User deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "tags": [
         {
             "name": "Authentication",
             "description": "Authentication"
+        },
+        {
+            "name": "User",
+            "description": "User"
         }
     ]
 }
