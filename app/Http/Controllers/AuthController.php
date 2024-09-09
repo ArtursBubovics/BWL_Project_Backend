@@ -7,6 +7,9 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use App\Models\RefreshToken;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 /**
  * @OA\Info(
@@ -75,9 +78,21 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $user->createToken($request->device_name)->plainTextToken;
+        // Генерация access токена
+        $accessToken = $user->createToken($request->device_name)->plainTextToken;
 
-        return response()->json(['token' => $token], 201);
+        // Генерация и сохранение refresh токена
+        $refreshToken = Str::random(64);
+        RefreshToken::create([
+            'user_id' => $user->id,
+            'refresh_token' => hash('sha256', $refreshToken),
+            'expires_at' => Carbon::now()->addDays(30), // Срок действия 30 дней
+        ]);
+
+        return response()->json([
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
+        ], 201);
     }
 
 
@@ -140,10 +155,51 @@ class AuthController extends Controller
         $user = Auth::user();
 
         if ($user instanceof \App\Models\User) {
-            $token = $user->createToken($request->device_name)->plainTextToken;
-            return response()->json(['token' => $token], 200);
+            // Генерация access токена
+            $accessToken = $user->createToken($request->device_name)->plainTextToken;
+
+            // Генерация и сохранение refresh токена
+            $refreshToken = Str::random(64);
+            RefreshToken::create([
+                'user_id' => $user->id,
+                'refresh_token' => hash('sha256', $refreshToken),
+                'expires_at' => Carbon::now()->addDays(30),
+            ]);
+
+            return response()->json([
+                'access_token' => $accessToken,
+                'refresh_token' => $refreshToken,
+            ], 200);
         } else {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
+    }
+
+    public function new_access_token(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'refresh_token' => 'required|string',
+            'device_name' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Найдем refresh токен в базе данных
+        $hashedToken = hash('sha256', $request->refresh_token);
+        $refreshToken = RefreshToken::where('refresh_token', $hashedToken)
+            ->where('expires_at', '>', Carbon::now())
+            ->first();
+
+        if (!$refreshToken) {
+            return response()->json(['message' => 'Invalid or expired refresh token'], 401);
+        }
+
+        // Генерация нового access токена
+        $user = $refreshToken->user;
+        $accessToken = $user->createToken($request->device_name)->plainTextToken;
+
+        return response()->json(['access_token' => $accessToken], 200);
     }
 }
