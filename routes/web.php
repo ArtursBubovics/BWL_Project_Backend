@@ -21,5 +21,6 @@ Route::post('/new-access-token', [AuthController::class, 'new_access_token']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-
-Route::middleware('auth:sanctum')->put('/user/update', [UserController::class, 'user_data_update']);
+Route::middleware('check.token.expiry')->group(function () {
+    Route::put('/user/update', [UserController::class, 'user_data_update']);
+});

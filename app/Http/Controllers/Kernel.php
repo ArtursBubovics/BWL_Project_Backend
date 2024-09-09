@@ -4,5 +4,6 @@ protected $middlewareGroups = [
     'throttle:api',
     \Illuminate\Routing\Middleware\SubstituteBindings::class,
     \Fruitcake\Cors\HandleCors::class,
+    'check.token.expiry' => \App\Http\Middleware\CheckTokenExpiry::class,
 ],
 ];

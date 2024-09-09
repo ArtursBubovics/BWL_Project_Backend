@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\RefreshToken;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Info(
@@ -80,6 +81,10 @@ class AuthController extends Controller
 
         // Генерация access токена
         $accessToken = $user->createToken($request->device_name)->plainTextToken;
+
+        DB::table('personal_access_tokens')
+        ->where('token', hash('sha256', $accessToken))
+        ->update(['expires_at' => Carbon::now()->addMinutes(60)]);
 
         // Генерация и сохранение refresh токена
         $refreshToken = Str::random(64);
@@ -157,6 +162,10 @@ class AuthController extends Controller
         if ($user instanceof \App\Models\User) {
             // Генерация access токена
             $accessToken = $user->createToken($request->device_name)->plainTextToken;
+
+            DB::table('personal_access_tokens')
+            ->where('token', hash('sha256', $accessToken))
+            ->update(['expires_at' => Carbon::now()->addMinutes(60)]);
 
             // Генерация и сохранение refresh токена
             $refreshToken = Str::random(64);
