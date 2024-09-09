@@ -8,9 +8,47 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+
     /**
-     * Обновление данных пользователя.
-     */
+ * @OA\Put(
+ *     path="/api/user/update",
+ *     summary="Update user data",
+ *     tags={"User"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={},
+ *             @OA\Property(property="name", type="string", example="John Doe"),
+ *             @OA\Property(property="email", type="string", format="email", example="johndoe@example.com"),
+ *             @OA\Property(property="password", type="string", format="password", example="newpassword123"),
+ *             @OA\Property(property="password_confirmation", type="string", format="password", example="newpassword123")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="User data updated successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="User updated successfully")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthorized",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="User not authenticated")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation errors",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="errors", type="object")
+ *         )
+ *     )
+ * )
+ */
+
     public function user_data_update(Request $request)
     {
         $user = $request->user();
