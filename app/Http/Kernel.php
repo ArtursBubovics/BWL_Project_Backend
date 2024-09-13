@@ -39,7 +39,7 @@ class Kernel extends HttpKernel
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\CheckTokenExpiry::class, // Add CheckTokenExpiry middleware here
+            \App\Http\Middleware\CheckTokenExpiry::class // Add CheckTokenExpiry middleware here
         ],
     ];
 
@@ -57,6 +57,6 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'check.token.expiry' => \App\Http\CheckTokenExpiry::class
+        'check.token.expiry' => \App\Http\Middleware\CheckTokenExpiry::class
     ];
 }
