@@ -36,6 +36,8 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
+        App\Providers\RouteServiceProvider::class,
+        Illuminate\Cookie\CookieServiceProvider::class
     ],
 
     /*
@@ -163,6 +165,7 @@ return [
         'Auth' => Illuminate\Support\Facades\Auth::class,
         'Gate' => Illuminate\Support\Facades\Gate::class,
         'Hash' => Illuminate\Support\Facades\Hash::class,
+        'Cookie' => Illuminate\Support\Facades\Cookie::class,
         'Route' => Illuminate\Support\Facades\Route::class
     ],
 
