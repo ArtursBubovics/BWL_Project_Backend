@@ -3,34 +3,40 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Support\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class CheckTokenExpiry
 {
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
-        $token = $request->bearerToken();
-        dd('Extracted token: ' . $token);
+        Log::info('CheckTokenExpiry middleware triggered');
 
-        if ($token) {
-            $hashedToken = hash('sha256', $token);
-            dd('Hashed token: ' . $hashedToken);
+        // Ваш код проверки токена
+        $token = $request->user()->currentAccessToken();
 
-            $tokenData = DB::table('personal_access_tokens')
-                ->where('token', $hashedToken)
-                ->where('expires_at', '>', Carbon::now())
-                ->first();
-
-            if (!$tokenData) {
-                dd('Token is invalid or expired: ' . $hashedToken);
-                return response()->json(['message' => 'Token is invalid or expired'], 401);
-            }
-        } else {
-            dd('Token not provided');
-            return response()->json(['message' => 'Token not provided'], 401);
+        if (!$token) {
+            Log::error('Token not found');
+            return response()->json(['message' => 'Token not found'], 401);
         }
 
+        $tokenData = DB::table('personal_access_tokens')->where('id', $token->id)->first();
+
+        if (!$tokenData) {
+            Log::error('Token data not found');
+            return response()->json(['message' => 'Token data not found'], 401);
+        }
+
+        $expiresAt = $tokenData->expires_at;
+
+        if ($expiresAt && Carbon::parse($expiresAt)->isPast()) {
+            Log::error('Token has expired');
+            return response()->json(['message' => 'Token has expired'], 401);
+        }
+
+        Log::info('Token is valid');
         return $next($request);
     }
 }
