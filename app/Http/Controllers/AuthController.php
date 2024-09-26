@@ -11,6 +11,7 @@ use App\Models\RefreshToken;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
  * @OA\Info(
@@ -82,10 +83,13 @@ class AuthController extends Controller
 
         // Генерация access токена
         $accessToken = $user->createToken($request->device_name)->plainTextToken;
+        $tokenId = explode('|', $accessToken)[0];
 
-        DB::table('personal_access_tokens')
-        ->where('token', hash('sha256', $accessToken))
-        ->update(['expires_at' => Carbon::now()->addMinutes(60)]);
+        $accessExpiresAt = Carbon::now()->addMinutes(60);
+        $refreshExpiresAt = Carbon::now()->addDays(30);
+        
+        
+        PersonalAccessToken::where('id', $tokenId)->update(['expires_at' => $accessExpiresAt]);
 
         // Генерация и сохранение refresh токена
         $refreshToken = Str::random(64);
@@ -98,6 +102,8 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
+            'access_expires_at' => $accessExpiresAt,
+            'refresh_expires_at' => $refreshExpiresAt
         ], 201);
     }
 
@@ -161,25 +167,29 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
-        if ($user instanceof \App\Models\User) {
+        if ($user instanceof User) {
             // Генерация access токена
             $accessToken = $user->createToken($request->device_name)->plainTextToken;
+            $tokenId = explode('|', $accessToken)[0];
 
-            DB::table('personal_access_tokens')
-            ->where('token', hash('sha256', $accessToken))
-            ->update(['expires_at' => Carbon::now()->addMinutes(60)]);
-
-            // Генерация и сохранение refresh токена
+            $accessExpiresAt = Carbon::now()->addMinutes(60);
+            $refreshExpiresAt = Carbon::now()->addDays(30);
+            
+            PersonalAccessToken::where('id', $tokenId)->update(['expires_at' => $accessExpiresAt]);
+            
+            // Генерация и сохранение refresh токена  
             $refreshToken = Str::random(64);
-            RefreshToken::create([
+            RefreshToken::create([  
                 'user_id' => $user->id,
                 'refresh_token' => hash('sha256', $refreshToken),
-                'expires_at' => Carbon::now()->addDays(30),
+                'expires_at' => $refreshExpiresAt,
             ]);
 
             return response()->json([
                 'access_token' => $accessToken,
                 'refresh_token' => $refreshToken,
+                'access_expires_at' => $accessExpiresAt,
+                'refresh_expires_at' => $refreshExpiresAt
             ], 200);
         } else {
             return response()->json(['message' => 'Unauthorized'], 401);
